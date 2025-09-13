@@ -36,25 +36,30 @@
         <div class="single-pro-details" id="single-pro-details"></div>
     </section>
 
-    <script type="module">
-       
-
+   <script type="module">
         // Get product name from URL
         const urlParams = new URLSearchParams(window.location.search);
         const productName = decodeURIComponent(urlParams.get('name') || '');
 
-        let products = []; // store products for search functionality
+        // Fetch products from Netlify function
+        async function fetchProducts() {
+            try {
+                const response = await fetch("/.netlify/functions/products");
+                const products = await response.json();
 
-// Fetch products from Netlify function instead of directly from Airtable
-async function fetchProducts() {
-    try {
-        const response = await fetch("/.netlify/functions/products"); // call your serverless function
-        products = await response.json(); // store globally for search
-        renderProducts(products);
-    } catch (error) {
-        console.error('Error fetching data:', error);
-    }
-}
+                // Find product matching the name
+                const product = products.find(p => p.fields.Name === productName);
+
+                if (product) {
+                    renderProduct(product);
+                } else {
+                    document.getElementById("single-pro-details").innerHTML = "<p>Product not found.</p>";
+                }
+            } catch (error) {
+                console.error('Error fetching product:', error);
+                document.getElementById("single-pro-details").innerHTML = "<p>Error loading product.</p>";
+            }
+        }
 
         function renderProduct(product) {
             const imageContainer = document.getElementById("single-pro-container");
@@ -63,19 +68,18 @@ async function fetchProducts() {
             // Main image
             const mainImg = document.createElement("img");
             mainImg.src = product.fields.Image?.[0]?.url || 'img/placeholder.jpg';
-            mainImg.id = "MainImg";
             mainImg.alt = product.fields.Name;
             mainImg.className = "big-image";
             mainImg.style.width = "100%";
             imageContainer.appendChild(mainImg);
 
-            // Thumbnails (extra images)
+            // Thumbnails for extra images
+            const images = product.fields.Images || [product.fields.Image?.[0]];
             const smallGroup = document.createElement("div");
             smallGroup.className = "small-img-group";
-            const images = product.fields.Images || [product.fields.Image?.[0]?.url];
 
             images.forEach(imgObj => {
-                const imgSrc = imgObj.url; // Airtable returns {id, url, filename}
+                const imgSrc = imgObj.url; // Airtable image object
                 const col = document.createElement("div");
                 col.className = "small-img-col";
 
@@ -96,17 +100,17 @@ async function fetchProducts() {
 
             imageContainer.appendChild(smallGroup);
 
-            // Product details
+            // Product details section
             detailsContainer.innerHTML = `
-        <h4>${product.fields.Name}</h4>
-        <h2>R${product.fields.Price || 0}</h2>
-        <input type="number" value="1" min="1" max="1" id="quantity">
-        <button class="normal" id="add-to-cart">Add To Cart</button>
-        <h4>Product Details</h4>
-        <span>${product.fields.Description || product.fields.Name}</span>
-    `;
+                <h4>${product.fields.Name}</h4>
+                <h2>R${product.fields.Price || 0}</h2>
+                <input type="number" value="1" min="1" id="quantity">
+                <button class="normal" id="add-to-cart">Add To Cart</button>
+                <h4>Product Details</h4>
+                <span>${product.fields.Description || product.fields.Name}</span>
+            `;
 
-            // Add to cart
+            // Cart button functionality
             document.getElementById("add-to-cart").addEventListener("click", () => {
                 const qty = parseInt(document.getElementById("quantity").value) || 1;
                 let cart = JSON.parse(localStorage.getItem("cart")) || [];
@@ -191,3 +195,4 @@ async function fetchProducts() {
 
 
 </html>
+
