@@ -390,30 +390,51 @@ footer .copyright {
 
 #prodetails {
     display: flex;
-    gap: 50px;
+    gap: 40px;       /* space between main image and details */
     margin-top: 20px;
+    flex-wrap: wrap;  /* allows stacking on mobile */
 }
 
 .single-pro-image {
     width: 45%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;       /* spacing between main image and thumbnails */
 }
 
+/* Main product image */
 .big-image {
     width: 100%;        
-    max-height: 400px; 
+    max-height: 500px;   /* comfortable size for laptops */
+    height: auto;
     object-fit: contain; 
+    display: block;
     margin-bottom: 10px;
 }
 
+/* Thumbnails row */
 .small-img-group {
     display: flex;
     justify-content: space-between;
+    gap: 10px;          /* spacing between thumbnails */
 }
 
+/* Each thumbnail */
 .small-img-col {
-    flex-basis: 24%;
+    flex: 1;
+    max-width: 24%;     /* 4 thumbnails in a row */
 }
 
+.small-img-col img {
+    width: 100%;
+    max-height: 100px;  /* visible but small */
+    object-fit: cover;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Product details section */
 .single-pro-details {
     width: 50%;
     padding-top: 30px;
@@ -446,7 +467,6 @@ footer .copyright {
 .single-pro-details span {
     line-height: 25px;
 }
-
 
 #close {
     display: none;
@@ -616,151 +636,104 @@ footer .copyright {
 }
 
 
+/* Tablet / small screens */
 @media (max-width: 799px) {
-
     .section-p1 {
         padding: 40px 40px;
     }
 
-    /*Nog probleme met burger*/
+    /* Navbar adjustments */
     #navbar {
         display: flex;
         flex-direction: column;
         align-items: flex-start;
-        justify-content: flex-start;
         position: fixed;
         top: 0;
         right: -300px;
-        /*Change to -300px to take of screen*/
         height: 100vh;
         width: 300px;
         background-color: #E3E6F3;
-        box-shadow: 0 40px 60px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 40px 60px rgba(0,0,0,0.1);
         padding: 80px 0 0 10px;
         transition: 0.3s;
-
     }
 
-    #navbar.active {
-        right: 0px;
-    }
+    #navbar.active { right: 0; }
+    #navbar li { margin-bottom: 25px; }
+    #mobile { display: flex; align-items: center; }
+    #mobile i { color: #1a1a1a; font-size: 24px; padding-left: 20px; }
+    #close { position: absolute; top: 30px; left: 30px; color: #222; font-size: 24px; }
 
-    #navbar li {
-        margin-bottom: 25px;
-    }
+    #hero { height: 70vh; padding: 0 80px; background-position: top 30% right 30%; }
 
-    #mobile {
-        display: flex;
-        align-items: center;
-    }
-
-    #mobile i {
-        color: #1a1a1a;
-        font-size: 24px;
-        padding-left: 20px;
-    }
-
-    #close {
-        position: absolute;
-        top: 30px;
-        left: 30px;
-        color: #222;
-        font-size: 24px;
-    }
-
-    #hero {
-        height: 70vh;
-        padding: 0 80px;
-        background-position: top 30% right 30%;
-    }
-
-    #product1 .pro-container {
-        justify-content: center;
-    }
-
-    #product1 .pro {
-        margin: 15px;
-
-    }
+    #product1 .pro-container { justify-content: center; }
+    #product1 .pro { margin: 15px; }
 
     /* Contact Page */
-    #form-details {
-        padding: 40px;
+    #form-details { padding: 40px; }
+    #form-details form { width: 100%; }
+    #form-details button { display: flex; justify-content: center; align-items: center; }
+    #newsletter .form { width: 100%; }
+    #cart-add { display: flex; justify-content: center; align-items: center; padding: 0.5px; }
+
+    /* Product Details - main image + thumbnails */
+    #prodetails {
+        flex-direction: column;   /* stack main image and details */
+        gap: 20px;
     }
 
-    #form-details form {
+    .single-pro-image {
         width: 100%;
     }
 
-    #form-details button {
-        display: flex;
-        justify-content: center;
-        align-items: center;
+    .big-image {
+        max-height: 400px;  /* slightly smaller than desktop */
     }
 
-    #newsletter .form {
+    .small-img-col img {
+        max-height: 80px;   /* smaller thumbnails */
+    }
+
+    .single-pro-details {
         width: 100%;
+        padding-top: 10px;
     }
-
-    #cart-add {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 0.5px;
-    }
-
-
-
 }
 
+/* Mobile phones */
 @media (max-width: 477px) {
-    #header {
-        padding: 10px 30px;
-    }
+    #header { padding: 10px 30px; }
+    h2 { font-size: 32px; }
+    h1 { font-size: 38px; }
+    #hero { padding: 0 20px; background-position: 55%; }
 
-
-    h2 {
-        font-size: 32px;
-    }
-
-    h1 {
-        font-size: 38px;
-    }
-
-    #hero {
-        padding: 0 20px;
-        background-position: 55%;
-    }
-
-
-
+    /* Product Details */
     #prodetails {
-        display: flex;
         flex-direction: column;
+        gap: 15px;
     }
 
-    #prodetails .single-pro-image {
-
+    .single-pro-image, .single-pro-details {
         width: 100%;
-        margin-right: 0px;
     }
 
-    #prodetails .single-pro-details {
-        padding-top: 0px;
-        width: 100%;
-
+    .big-image {
+        max-height: 300px;  /* mobile-friendly */
     }
 
+    .small-img-col img {
+        max-height: 60px;   /* mobile thumbnails smaller */
+    }
+
+    /* Product grid for shop page */
     .pro-container {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
-        /* 2 per row on phones */
         gap: 10px;
     }
 
     .pro {
         width: 100%;
-        /* card takes full grid cell */
         background: #fff;
         padding: 8px;
         border-radius: 8px;
@@ -768,11 +741,5 @@ footer .copyright {
         box-sizing: border-box;
     }
 
-    .pro img {
-        width: 100%;
-        border-radius: 5px;
-    }
-
-
-
+    .pro img { width: 100%; border-radius: 5px; }
 }
