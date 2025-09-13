@@ -37,28 +37,24 @@
     </section>
 
     <script type="module">
-        const token = 'pat0bkuE3O24rYps5.eb91e21b72e581b841d2b79e9842b4759553bbeccb1e837136ceb819e6760e60';
-        const baseId = 'appx5uuFq0juUyZDj';
-        const tableName = 'Table%201';
+       
 
         // Get product name from URL
         const urlParams = new URLSearchParams(window.location.search);
         const productName = decodeURIComponent(urlParams.get('name') || '');
 
-        async function fetchProducts() {
-            try {
-                const response = await fetch(`https://api.airtable.com/v0/${baseId}/${tableName}`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
-                const data = await response.json();
-                const product = data.records.find(p => p.fields.Name === productName) || data.records[0];
-                renderProduct(product);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
-        }
+        let products = []; // store products for search functionality
+
+// Fetch products from Netlify function instead of directly from Airtable
+async function fetchProducts() {
+    try {
+        const response = await fetch("/.netlify/functions/products"); // call your serverless function
+        products = await response.json(); // store globally for search
+        renderProducts(products);
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
+}
 
         function renderProduct(product) {
             const imageContainer = document.getElementById("single-pro-container");
@@ -192,5 +188,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tabletop.js/1.5.4/tabletop.min.js"></script>
     <script src="script.js"></script>
 </body>
+
 
 </html>
