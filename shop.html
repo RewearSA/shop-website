@@ -161,9 +161,20 @@
         `;
 
                 // Click to go to single product page
-                div.addEventListener("click", () => {
-                    window.location.href = `sproduct.html?name=${encodeURIComponent(product.fields.Name)}`;
+                div.addEventListener("click", (event) => {
+    // Make sure clicks on the button do nothing here
+                if (event.target.closest("button")) return;
+
+                const extraImages = product.fields.Images?.map(img => img.url) || [];
+                const query = new URLSearchParams({
+                name: product.fields.Name,
+                price: product.fields.Price || 0,
+                mainImage: product.fields.Image?.[0]?.url || '',
+                extraImages: JSON.stringify(extraImages)
                 });
+                window.location.href = `sproduct.html?${query.toString()}`;
+                });
+
 
                 container.appendChild(div);
             });
@@ -290,3 +301,4 @@
 
 
 </html>
+
