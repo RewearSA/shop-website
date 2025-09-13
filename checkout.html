@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout - ReWear SA</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f8f5ef;
+            margin: 0;
+            padding: 0;
+        }
+
+        .checkout-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            max-width: 1100px;
+            margin: 40px auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+        }
+
+        .checkout-left h2 {
+            margin-bottom: 20px;
+        }
+
+        .checkout-left input,
+        .checkout-left select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        .checkout-right {
+            background: #fafafa;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .summary-total {
+            display: flex;
+            justify-content: space-between;
+            font-weight: bold;
+            font-size: 18px;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
+        }
+
+        .checkout-btn {
+            width: 100%;
+            background: #000;
+            color: #fff;
+            padding: 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 20px;
+            font-size: 16px;
+        }
+
+        /* --- Mobile Responsiveness --- */
+        @media (max-width: 768px) {
+            .checkout-container {
+                grid-template-columns: 1fr;
+                /* stack columns vertically */
+                padding: 20px;
+                margin: 20px;
+            }
+
+            .checkout-left,
+            .checkout-right {
+                width: 100%;
+            }
+
+            .checkout-left h2,
+            .checkout-right h3 {
+                font-size: 1.2rem;
+            }
+
+            .checkout-btn {
+                font-size: 14px;
+                padding: 12px;
+            }
+
+            .summary-item,
+            .summary-total {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .summary-item span,
+            .summary-total span {
+                margin-bottom: 5px;
+            }
+        }
+
+        /* --- Shipping Modal --- */
+        #shippingModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 15px;
+            box-sizing: border-box;
+        }
+
+        #shippingModal>div {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 80%;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        #shippingModal h2 {
+            font-size: 1.4rem;
+            margin-bottom: 10px;
+        }
+
+        #shippingModal h3 {
+            font-size: 1.1rem;
+            margin-top: 15px;
+        }
+
+        #shippingModal p {
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        /* Close button */
+        #closeModal {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        /* Modal responsiveness */
+        @media (max-width: 480px) {
+            #shippingModal>div {
+                padding: 15px;
+            }
+
+            #shippingModal h2 {
+                font-size: 1.2rem;
+            }
+
+            #shippingModal h3 {
+                font-size: 1rem;
+            }
+
+            #shippingModal p {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="checkout-container">
+        <!-- Left side: contact & delivery -->
+        <div class="checkout-left">
+            <h2>Contact</h2>
+            <input type="email" placeholder="Email" required>
+            <label><input type="checkbox"> Email me with news and offers</label>
+
+            <h2>Delivery</h2>
+            <select>
+                <option>South Africa</option>
+            </select>
+            <input type="text" placeholder="First name" required>
+            <input type="text" placeholder="Last name" required>
+            <input type="text" placeholder="Address" required>
+            <input type="text" placeholder="Apartment, suite, etc. (optional)">
+            <input type="text" placeholder="City" required>
+            <input type="text" placeholder="Province" required>
+            <input type="text" placeholder="Postal code" required>
+            <input type="text" placeholder="Phone" required>
+        </div>
+
+        <!-- Right side: order summary -->
+        <div class="checkout-right">
+            <h3>Order Summary</h3>
+            <div id="summary-items"></div>
+            <div class="summary-item"><span>Subtotal</span><span id="subtotal">R0.00</span></div>
+            <div class="summary-item"><span>Shipping</span><span id="shipping">R80.00</span></div>
+            <div class="summary-total"><span>Total</span><span id="total">R0.00</span></div>
+
+            <button class="checkout-btn" id="payflexCheckout">Checkout with Payflex</button>
+            <button class="checkout-btn" id="shippingPolicyBtn" style="background:#555; margin-top:10px;">Shipping
+                Policy</button>
+        </div>
+    </div>
+
+    <div id="shippingModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
+background:rgba(0,0,0,0.6); justify-content:center; align-items:center; z-index:1000;">
+        <div
+            style="background:#fff; padding:20px; border-radius:10px; max-width:600px; width:90%; max-height:80%; overflow-y:auto; position:relative;">
+            <span id="closeModal"
+                style="position:absolute; top:10px; right:15px; cursor:pointer; font-size:20px;">&times;</span>
+            <h2>Shipping Policy – Rewear SA</h2>
+            <p>Thank you for shopping with Rewear SA!<br><br>
+                This Shipping Policy outlines the terms and conditions related to the shipping and delivery of our
+                products. By placing an order on our website, you agree to the terms below.</p>
+            <h3>Incorrect Addresses</h3>
+            <p>Please double-check your shipping info. We are not responsible for delays due to incorrect or incomplete
+                addresses.</p>
+            <h3>Order Processing Time</h3>
+            <p>Orders are processed within 1–4 business days. Processing may take slightly longer during sales or
+                restocks. We do not manufacture products, so all items listed are ready for dispatch.</p>
+            <h3>Shipping Destinations</h3>
+            <p>We currently ship only within South Africa. No international shipping is available at this time.</p>
+            <h3>Shipping Methods & Carriers</h3>
+            <p>We use trusted courier partners. Shipping options will be shown at checkout.</p>
+            <h3>Shipping Fees</h3>
+            <p>Calculated based on your address, order weight, and delivery method. Fees are shown at checkout.</p>
+            <h3>Order Tracking</h3>
+            <p>You’ll receive a tracking number by email once your order ships.</p>
+            <h3>Delivery Times</h3>
+            <p>Delivery usually takes 1–4 business days after processing.</p>
+
+            <h3>Order Changes</h3>
+            <p>Once submitted, we may not be able to change the shipping address or other details.</p>
+            <h3>Need Help?</h3>
+            <p>WhatsApp: +27 71 458 7234<br>
+                Instagram: @rewearsa<br>
+                Email: hello@rewearsa.co.za</p>
+        </div>
+    </div>
+
+
+    <script>
+
+        const modal = document.getElementById("shippingModal");
+        const openBtn = document.getElementById("shippingPolicyBtn");
+        const closeBtn = document.getElementById("closeModal");
+
+        openBtn.addEventListener("click", () => {
+            modal.style.display = "flex";
+        });
+
+        closeBtn.addEventListener("click", () => {
+            modal.style.display = "none";
+        });
+
+        window.addEventListener("click", (e) => {
+            if (e.target === modal) {
+                modal.style.display = "none";
+            }
+        });
+        const cart = JSON.parse(localStorage.getItem("cart")) || [];
+        const shippingFee = 80;
+
+        const summaryItems = document.getElementById("summary-items");
+        const subtotalEl = document.getElementById("subtotal");
+        const totalEl = document.getElementById("total");
+
+        let subtotal = 0;
+        summaryItems.innerHTML = "";
+
+        cart.forEach(item => {
+            const row = document.createElement("div");
+            row.className = "summary-item";
+            row.innerHTML = `<span>${item.name} (x${item.quantity})</span><span>R${(item.price * item.quantity).toFixed(2)}</span>`;
+            summaryItems.appendChild(row);
+            subtotal += item.price * item.quantity;
+        });
+
+        subtotalEl.textContent = "R" + subtotal.toFixed(2);
+        totalEl.textContent = "R" + (subtotal + shippingFee).toFixed(2);
+
+        document.getElementById("payflexCheckout").addEventListener("click", () => {
+            alert("Here you would redirect to Payflex checkout with total: R" + (subtotal + shippingFee).toFixed(2));
+            // TODO: send to backend -> Payflex API
+        });
+    </script>
+
+    <a href="https://wa.me/27714587234?text=Hello,%RewearSA%2C%20I%20wanttotalk" class="whatsapp-button" target="_blank"
+        aria-label="Chat with us on WhatsApp">
+        <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="WhatsApp" />
+    </a>
+
+</body>
+
+</html>

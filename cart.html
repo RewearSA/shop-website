@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rewear SA</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <section id="header">
+        <a href="#"><img src="img/logo.jpg" alt="Logo" class="logo"></a>
+
+        <div>
+            <ul id="navbar">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="shop.html">Shop</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="cart.html" class="active"><i class="fa fa-shopping-cart" aria-hidden="true"></i></a></li>
+                <a href="#" id="close"><i class="fa fa-times"></i></a>
+            </ul>
+        </div>
+
+        <div id="mobile">
+
+            <a href="cart.html"><i class="fas fa-shopping-cart" aria-hidden="true"></i></a>
+            <i id="bar" class="fas fa-bars"></i>
+
+        </div>
+    </section>
+
+
+    <section id="cart" class="section-p1">
+        <table width="100%">
+            <thead>
+                <tr>
+
+
+                    <td>Product</td>
+                    <td>Price</td>
+                    <td>Quantity</td>
+                    <td>Subtotal</td>
+                </tr>
+            </thead>
+
+            <tbody id="cart-items">
+
+            </tbody>
+        </table>
+    </section>
+
+    <section id="cart-checkout" style="max-width:1100px; margin:30px auto; text-align:right;
+    display: flex;flex-direction: column;align-items: center;">
+        <h3>Ready to complete your order?</h3>
+        <p>Total: <strong id="cart-total-summary">R0.00</strong></p>
+        <a href="checkout.html" style="
+        display:inline-block;
+        padding:12px 25px;
+        background:#000;
+        color:#fff;
+        border-radius:6px;
+        text-decoration:none;
+        font-weight:bold;
+        margin-top:10px;
+    ">Proceed to Checkout</a>
+    </section>
+
+
+    <a href="https://wa.me/27714587234?text=Hello,%RewearSA%2C%20I%20wanttotalk" class="whatsapp-button" target="_blank"
+        aria-label="Chat with us on WhatsApp">
+        <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="WhatsApp" />
+    </a>
+
+    <footer class="section-p1">
+        <div class="col">
+            <h4>Contact</h4>
+            <p><strong>Phone: </strong>+27 78 889 5546</p>
+            <p><strong>Hours:</strong> 10:00 - 17:00 Mon - Sat</p>
+            <div class="follow">
+                <h4>Follow us</h4>
+                <div class="icon">
+                    <i class="fab fa-facebook"></i>
+                    <i class="fab fa-instagram"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <h4>About</h4>
+            <a href="#">About us</a>
+            <a href="#">Delivery Information</a>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Contact Us</a>
+
+        </div>
+
+        <div class="col">
+            <h4>My Account</h4>
+            <a href="#">Sign In</a>
+            <a href="#">View Cart</a>
+            <a href="#">Track My Order</a>
+            <a href="#">Help</a>
+
+        </div>
+
+        <div class="install">
+            <p>Secured Payment Gateways</p>
+            <img src="img/pay.png" alt="">
+        </div>
+
+        <div class="copyright">
+            <p>@ 2025, ReWear SA </p>
+        </div>
+    </footer>
+
+    <script>
+        const cartItemsContainer = document.getElementById("cart-items");
+        const shippingFee = 80;
+
+        // Load cart from localStorage or start empty
+        let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+        // Function to render the cart table
+        function renderCart() {
+            cartItemsContainer.innerHTML = ""; // clear table first
+            let subtotal = 0;
+
+            cart.forEach((item, index) => {
+                subtotal += item.price * item.quantity;
+
+                const row = document.createElement("tr");
+
+                row.innerHTML = `
+                <td>
+                    <div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
+                        <img src="${item.image}" alt="" width="50" style="border-radius:5px;">
+                        <span>${item.name}</span>
+                    </div>
+                </td> 
+                <td>R${item.price.toFixed(2)}</td>
+                <td>
+
+                    <div style="display:flex; align-items:center; gap:10px; justify-content:center;">
+                        <input 
+                        type="number" 
+                        value="${item.quantity}" 
+                        min="1" 
+                        max="1"
+                        style="width:50px;" 
+                        data-index="${index}" 
+                        class="qty-input">
+
+                        <button data-index="${index}" class="remove-btn" style="background:red; color:white; border:none; padding:5px 10px; cursor:pointer;">-</button>
+                    </div>    
+                    
+                </td>
+                <td>R${(item.price * item.quantity).toFixed(2)}</td>
+               
+            `;
+                cartItemsContainer.appendChild(row);
+            });
+
+            // Shipping fee row
+            const totalRow = document.createElement("tr");
+            const total = subtotal + (cart.length > 0 ? shippingFee : 0);
+            totalRow.innerHTML = `
+            <td colspan="3" style="text-align:right;">Shipping Fee: </td>
+            <td>R${cart.length > 0 ? shippingFee.toFixed(2) : "0.00"}</td>
+        `;
+            cartItemsContainer.appendChild(totalRow);
+
+            // Grand total row
+            const grandTotalRow = document.createElement("tr");
+            grandTotalRow.innerHTML = `
+            <td colspan="3" style="text-align:right"><strong>Total:</strong></td>
+            <td><strong>R${total.toFixed(2)}</strong></td>
+        `;
+            cartItemsContainer.appendChild(grandTotalRow);
+
+            const cartTotalSummary = document.getElementById("cart-total-summary");
+            if (cartTotalSummary) {
+                cartTotalSummary.textContent = "R" + total.toFixed(2);
+            }
+
+            // Attach event listeners AFTER rendering
+            document.querySelectorAll(".qty-input").forEach(input => {
+                input.addEventListener("change", (e) => {
+                    const index = e.target.dataset.index;
+                    let newQty = parseInt(e.target.value);
+
+                    if (isNaN(newQty) || newQty < 1) newQty = 1; // prevent invalid qty
+                    cart[index].quantity = newQty;
+
+                    localStorage.setItem("cart", JSON.stringify(cart));
+                    renderCart(); // re-render with updated qty
+                });
+            });
+
+            document.querySelectorAll(".remove-btn").forEach(btn => {
+                btn.addEventListener("click", (e) => {
+                    const index = e.target.dataset.index;
+                    cart.splice(index, 1);
+                    localStorage.setItem("cart", JSON.stringify(cart));
+                    renderCart();
+                });
+            });
+        }
+
+
+
+        // Add item to cart
+        function addToCart(name, price, image) {
+            const existingItem = cart.find(i => i.name === name);
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({ name, price, image, quantity: 1 });
+            }
+
+            localStorage.setItem("cart", JSON.stringify(cart));
+            renderCart();
+        }
+
+        // Initial render
+        renderCart();
+    </script>
+
+
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tabletop.js/1.5.4/tabletop.min.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

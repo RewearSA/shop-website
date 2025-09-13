@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rewear SA</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <section id="header">
+        <a href="#"><img src="img/logo.jpg" alt="Logo" class="logo"></a>
+
+        <div>
+            <ul id="navbar">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="shop.html" class="active">Shop</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li style="position:relative; flex:1; min-width:150px;">
+                    <input type="text" id="product-search" placeholder="Search products..."
+                        style="width:100%; padding:8px; font-size:14px; box-sizing:border-box;">
+                    <ul id="search-results"
+                        style="
+        position:absolute; top:100%; left:0; right:0; 
+        background:#fff; list-style:none; padding:0; margin:0; border:1px solid #ccc; 
+        display:none; max-height:300px; overflow-y:auto; z-index:1000; box-shadow:0 2px 6px rgba(0,0,0,0.15); border-radius:5px;">
+                    </ul>
+                </li>
+                <li><a href="cart.html"><i class="fa fa-shopping-cart" aria-hidden="true"></i></a></li>
+                <a href="#" id="close"><i class="fa fa-times"></i></a>
+            </ul>
+        </div>
+
+        <div id="mobile">
+
+            <a href="cart.html"><i class="fas fa-shopping-cart" aria-hidden="true"></i></a>
+            <i id="bar" class="fas fa-bars"></i>
+
+        </div>
+    </section>
+
+
+
+    <section id="product1" class="section-p1">
+        <h2>Featured Products</h2>
+        <p>Second Hand Clothes</p>
+        <div class="pro-container" id="product-container">
+
+        </div>
+    </section>
+
+
+
+
+
+
+    <section id="newsletter" class="section-p1 section-m1">
+        <div class="newstext">
+            <h4>Sign Up For <span>10% Off</span></h4>
+            <p>Get E-mail updates about our latest shop and <span class="span2">special offers.</span></p>
+        </div>
+        <div class="form">
+            <input type="text" placeholder="Your email address">
+            <button class="normal">Sign Up</button>
+        </div>
+    </section>
+
+    <footer class="section-p1">
+        <div class="col">
+            <h4>Contact</h4>
+            <p><strong>Phone: </strong>+27 78 889 5546</p>
+            <p><strong>Hours:</strong> 10:00 - 17:00 Mon - Sat</p>
+            <div class="follow">
+                <h4>Follow us</h4>
+                <div class="icon">
+                    <i class="fab fa-facebook"></i>
+                    <i class="fab fa-instagram"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <h4>About</h4>
+            <a href="#">About us</a>
+            <a href="#">Delivery Information</a>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Contact Us</a>
+
+        </div>
+
+        <div class="col">
+            <h4>My Account</h4>
+            <a href="#">Sign In</a>
+            <a href="#">View Cart</a>
+            <a href="#">Track My Order</a>
+            <a href="#">Help</a>
+
+        </div>
+
+        <div class="install">
+            <p>Secured Payment Gateways</p>
+            <img src="img/pay.png" alt="">
+        </div>
+
+        <div class="copyright">
+            <p>@ 2025, ReWear SA </p>
+        </div>
+    </footer>
+
+    <script type="module">
+        const token = 'pat0bkuE3O24rYps5.eb91e21b72e581b841d2b79e9842b4759553bbeccb1e837136ceb819e6760e60';
+        const baseId = 'appx5uuFq0juUyZDj';
+        const tableName = 'Table%201'; // URL-encoded table name
+
+        const container = document.getElementById("product-container");
+        const searchInput = document.getElementById("product-search");
+        const searchResults = document.getElementById("search-results");
+
+        let products = [];
+
+        // Fetch products from Airtable
+        async function fetchProducts() {
+            try {
+                const response = await fetch(`https://api.airtable.com/v0/${baseId}/${tableName}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const data = await response.json();
+                products = data.records;
+                renderProducts(products);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        // Render products
+        function renderProducts(productsList) {
+            container.innerHTML = '';
+
+            productsList.forEach(product => {
+                const mainImage = product.fields.Image?.[0]?.url || 'img/placeholder.jpg';
+
+                const div = document.createElement("div");
+                div.className = "pro";
+
+                div.innerHTML = `
+            <img src="${mainImage}" alt="${product.fields.Name}">
+            <div class="des">
+                <span>${product.fields.Brand || ''}</span>
+                <h5>${product.fields.Name}</h5>
+                <h4>R${product.fields.Price || 0}</h4>
+            </div>
+            <button class="cart" onclick="event.stopPropagation(); addToCart(
+                '${product.fields.Name}',
+                ${product.fields.Price || 0},
+                '${mainImage}'
+            )">
+                <img src="img/shopping-bag.png" alt="Cart" class="cart-icon">
+            </button>
+        `;
+
+                // Click to go to single product page
+                div.addEventListener("click", () => {
+                    window.location.href = `sproduct.html?name=${encodeURIComponent(product.fields.Name)}`;
+                });
+
+                container.appendChild(div);
+            });
+        }
+
+        // Search functionality
+        searchInput.addEventListener("input", function () {
+            const query = searchInput.value.toLowerCase().trim();
+            searchResults.innerHTML = "";
+
+            if (!query) {
+                searchResults.style.display = "none";
+                return;
+            }
+
+            const matchedProducts = products.filter(p =>
+                p.fields.Name.toLowerCase().includes(query) ||
+                (p.fields.Size && p.fields.Size.toLowerCase().includes(query))
+            );
+
+            if (matchedProducts.length > 0) {
+                matchedProducts.forEach(p => {
+                    const li = document.createElement("li");
+                    li.style.display = "flex";
+                    li.style.alignItems = "center";
+                    li.style.justifyContent = "space-between";
+                    li.style.padding = "8px 10px";
+                    li.style.cursor = "pointer";
+                    li.style.gap = "10px";
+                    li.style.borderBottom = "1px solid #eee";
+
+                    const leftDiv = document.createElement("div");
+                    leftDiv.style.display = "flex";
+                    leftDiv.style.alignItems = "center";
+                    leftDiv.style.gap = "10px";
+
+                    const img = document.createElement("img");
+                    img.src = p.fields.Image?.[0]?.url || 'img/placeholder.jpg';
+                    img.alt = p.fields.Name;
+                    img.style.width = "40px";
+                    img.style.height = "40px";
+                    img.style.objectFit = "cover";
+                    img.style.borderRadius = "5px";
+
+                    const span = document.createElement("span");
+                    span.innerText = p.fields.Name + (p.fields.Size ? ` (${p.fields.Size})` : "");
+
+                    leftDiv.appendChild(img);
+                    leftDiv.appendChild(span);
+
+                    const priceSpan = document.createElement("span");
+                    priceSpan.innerText = `R${p.fields.Price || 0}`;
+                    priceSpan.style.fontWeight = "bold";
+
+                    li.appendChild(leftDiv);
+                    li.appendChild(priceSpan);
+
+                    li.addEventListener("click", () => {
+                        window.location.href = `sproduct.html?name=${encodeURIComponent(p.fields.Name)}`;
+                    });
+
+                    searchResults.appendChild(li);
+                });
+                searchResults.style.display = "block";
+            } else {
+                const li = document.createElement("li");
+                li.style.padding = "8px";
+                li.innerText = "No products found";
+                searchResults.appendChild(li);
+                searchResults.style.display = "block";
+            }
+        });
+
+        // Hide search results when clicking outside
+        document.addEventListener("click", e => {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.style.display = "none";
+            }
+        });
+
+        // Initialize shop
+        fetchProducts();
+
+    </script>
+
+    <style>
+        /* Make dropdown mobile-friendly */
+        @media screen and (max-width: 768px) {
+            #search-results {
+                width: 100% !important;
+                /* full width on phones */
+                left: 0 !important;
+                right: 0 !important;
+            }
+
+            #product-search {
+                font-size: 16px;
+            }
+
+            #search-results li {
+                font-size: 14px;
+            }
+        }
+    </style>
+
+    <script>
+        function addToCart(name, price) {
+            let cart = JSON.parse(localStorage.getItem("cart")) || [];
+            cart.push({ name, price });
+            localStorage.setItem("cart", JSON.stringify(cart));
+            alert(name + " added to cart!");
+        }
+    </script>
+
+    <a href="https://wa.me/27714587234?text=Hello,%RewearSA%2C%20I%20wanttotalk" class="whatsapp-button" target="_blank"
+        aria-label="Chat with us on WhatsApp">
+        <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="WhatsApp" />
+    </a>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tabletop.js/1.5.4/tabletop.min.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

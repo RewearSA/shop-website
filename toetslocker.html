@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PUDO Lockers - Shipping</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+
+    <style>
+        #map {
+            height: 600px;
+            width: 100%;
+        }
+
+        #shipping-info {
+            margin-top: 10px;
+        }
+
+        button {
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Select a PUDO Locker for Delivery</h2>
+    <div id="map"></div>
+    <p id="selected-locker">No locker selected</p>
+
+    <button id="shipping-info">How we calculate shipping</button>
+    <p id="shipping-explanation" style="display:none;">
+        Shipping is calculated from <b>Wonderboom Plaza, Pretoria</b> (8622+95) to the selected locker.
+        Cost depends on distance. This is a fixed origin for all deliveries.
+    </p>
+
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+    <script type="module">
+        (async () => {
+            try {
+                const res = await fetch('./lockers.json');
+                const lockers = await res.json();
+
+                // Convert latitude/longitude to float
+                lockers.forEach(l => {
+                    l.latitude = parseFloat(l.latitude);
+                    l.longitude = parseFloat(l.longitude);
+                });
+
+                // Fixed origin locker: Wonderboom Plaza
+                const origin = {
+                    name: "Wonderboom Plaza",
+                    address: "8622+95, Pretoria",
+                    latitude: -25.7032,  // Replace with actual lat
+                    longitude: 28.2285   // Replace with actual lng
+                };
+
+                // Initialize map
+                const map = L.map('map').setView([origin.latitude, origin.longitude], 6);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap contributors'
+                }).addTo(map);
+
+                // Marker for origin
+                const originMarker = L.marker([origin.latitude, origin.longitude], { color: 'red' })
+                    .addTo(map)
+                    .bindPopup(`<b>${origin.name}</b><br>${origin.address}<br>Shipping origin`);
+
+                // Marker cluster group for all lockers
+                const markers = L.markerClusterGroup();
+
+                lockers.forEach(l => {
+                    const marker = L.marker([l.latitude, l.longitude]);
+                    marker.bindPopup(`<b>${l.name}</b><br>${l.address}<br>
+                    <button onclick="selectLocker('${l.id}')">Select as destination</button>`);
+                    markers.addLayer(marker);
+                });
+                map.addLayer(markers);
+
+                let currentLine = null;
+                // Function to handle locker selection
+                window.selectLocker = function (id) {
+                    const locker = lockers.find(l => l.id === id);
+                    if (locker) {
+                        document.getElementById('selected-locker').innerText =
+                            `Selected locker: ${locker.name}, ${locker.address}`;
+                        alert(`Shipping will be calculated from ${origin.name} to ${locker.name}`);
+
+                        if (currentLine) {
+                            map.removeLayer(currentLine);
+                        }
+
+                        currentLine = L.polyline([
+                            [origin.latitude, origin.longitude],
+                            [locker.latitude, locker.longitude]
+                        ], { color: 'blue', weight: 3, dashArray: '5,5' }).addTo(map);
+
+                        // Zoom map to fit both points
+                        const bounds = L.latLngBounds([
+                            [origin.latitude, origin.longitude],
+                            [locker.latitude, locker.longitude]
+                        ]);
+                        map.fitBounds(bounds.pad(0.2));
+
+                    }
+                };
+
+
+                // Show shipping explanation
+                document.getElementById('shipping-info').onclick = () => {
+                    const p = document.getElementById('shipping-explanation');
+                    p.style.display = p.style.display === 'none' ? 'block' : 'none';
+                };
+
+            } catch (err) {
+                console.error("Error loading lockers.json:", err);
+                alert("Failed to load lockers JSON");
+            }
+        })();
+    </script>
+</body>
+
+</html>

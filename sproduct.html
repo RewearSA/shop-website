@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rewear SA</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- HEADER -->
+    <section id="header">
+        <a href="#"><img src="img/logo.jpg" alt="Logo" class="logo"></a>
+        <div>
+            <ul id="navbar">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="shop.html" class="active">Shop</a></li>
+                <li><a href="about.html">About</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="cart.html"><i class="fa fa-shopping-cart"></i></a></li>
+                <a href="#" id="close"><i class="fa fa-times"></i></a>
+            </ul>
+        </div>
+        <div id="mobile">
+            <a href="cart.html"><i class="fas fa-shopping-cart"></i></a>
+            <i id="bar" class="fas fa-bars"></i>
+        </div>
+    </section>
+
+    <!-- PRODUCT DETAILS -->
+    <section id="prodetails" class="section-p1">
+        <div class="single-pro-image" id="single-pro-container"></div>
+        <div class="single-pro-details" id="single-pro-details"></div>
+    </section>
+
+    <script type="module">
+        const token = 'pat0bkuE3O24rYps5.eb91e21b72e581b841d2b79e9842b4759553bbeccb1e837136ceb819e6760e60';
+        const baseId = 'appx5uuFq0juUyZDj';
+        const tableName = 'Table%201';
+
+        // Get product name from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const productName = decodeURIComponent(urlParams.get('name') || '');
+
+        async function fetchProducts() {
+            try {
+                const response = await fetch(`https://api.airtable.com/v0/${baseId}/${tableName}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                const data = await response.json();
+                const product = data.records.find(p => p.fields.Name === productName) || data.records[0];
+                renderProduct(product);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        function renderProduct(product) {
+            const imageContainer = document.getElementById("single-pro-container");
+            const detailsContainer = document.getElementById("single-pro-details");
+
+            // Main image
+            const mainImg = document.createElement("img");
+            mainImg.src = product.fields.Image?.[0]?.url || 'img/placeholder.jpg';
+            mainImg.id = "MainImg";
+            mainImg.alt = product.fields.Name;
+            mainImg.className = "big-image";
+            mainImg.style.width = "100%";
+            imageContainer.appendChild(mainImg);
+
+            // Thumbnails (extra images)
+            const smallGroup = document.createElement("div");
+            smallGroup.className = "small-img-group";
+            const images = product.fields.Images || [product.fields.Image?.[0]?.url];
+
+            images.forEach(imgObj => {
+                const imgSrc = imgObj.url; // Airtable returns {id, url, filename}
+                const col = document.createElement("div");
+                col.className = "small-img-col";
+
+                const img = document.createElement("img");
+                img.src = imgSrc;
+                img.alt = product.fields.Name;
+                img.className = "small-img";
+                img.style.width = "100%";
+                img.style.cursor = "pointer";
+
+                img.addEventListener("click", () => {
+                    mainImg.src = imgSrc;
+                });
+
+                col.appendChild(img);
+                smallGroup.appendChild(col);
+            });
+
+            imageContainer.appendChild(smallGroup);
+
+            // Product details
+            detailsContainer.innerHTML = `
+        <h4>${product.fields.Name}</h4>
+        <h2>R${product.fields.Price || 0}</h2>
+        <input type="number" value="1" min="1" max="1" id="quantity">
+        <button class="normal" id="add-to-cart">Add To Cart</button>
+        <h4>Product Details</h4>
+        <span>${product.fields.Description || product.fields.Name}</span>
+    `;
+
+            // Add to cart
+            document.getElementById("add-to-cart").addEventListener("click", () => {
+                const qty = parseInt(document.getElementById("quantity").value) || 1;
+                let cart = JSON.parse(localStorage.getItem("cart")) || [];
+                const existing = cart.find(item => item.name === product.fields.Name);
+
+                if (existing) {
+                    existing.qty += qty;
+                } else {
+                    cart.push({
+                        name: product.fields.Name,
+                        price: product.fields.Price || 0,
+                        image: product.fields.Image?.[0]?.url || 'img/placeholder.jpg',
+                        qty
+                    });
+                }
+
+                localStorage.setItem("cart", JSON.stringify(cart));
+                alert(`${qty} x ${product.fields.Name} added to cart!`);
+            });
+        }
+
+        fetchProducts();
+    </script>
+
+
+    <!-- Newsletter -->
+    <section id="newsletter" class="section-p1 section-m1">
+        <div class="newstext">
+            <h4>Sign Up For <span>10% Off</span></h4>
+            <p>Get E-mail updates about our latest shop and <span class="span2">special offers.</span></p>
+        </div>
+        <div class="form">
+            <input type="text" placeholder="Your email address">
+            <button class="normal">Sign Up</button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="section-p1">
+        <div class="col">
+            <h4>Contact</h4>
+            <p><strong>Phone: </strong>+27 78 889 5546</p>
+            <p><strong>Hours:</strong> 10:00 - 17:00 Mon - Sat</p>
+            <div class="follow">
+                <h4>Follow us</h4>
+                <div class="icon">
+                    <i class="fab fa-facebook"></i>
+                    <i class="fab fa-instagram"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <h4>About</h4>
+            <a href="#">About us</a>
+            <a href="#">Delivery Information</a>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Contact Us</a>
+        </div>
+
+        <div class="col">
+            <h4>My Account</h4>
+            <a href="#">Sign In</a>
+            <a href="#">View Cart</a>
+            <a href="#">Track My Order</a>
+            <a href="#">Help</a>
+        </div>
+
+        <div class="install">
+            <p>Secured Payment Gateways</p>
+            <img src="img/pay.png" alt="">
+        </div>
+
+        <div class="copyright">
+            <p>@ 2025, ReWear SA </p>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tabletop.js/1.5.4/tabletop.min.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

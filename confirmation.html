@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+
+    <script>
+        async function createShipment(orderId, lockerId, buyer) {
+            let res = await fetch("https://api-pudo.co.za/shipments", {
+                method: "POST",
+                headers: { "Content-Type": "application/json", "Authorization": "Bearer YOUR_API_KEY" },
+                body: JSON.stringify({
+                    reference: orderId,
+                    collection_address: { /* your warehouse */ },
+                    delivery_address: {
+                        terminalId: lockerId,
+                        name: buyer.name,
+                        phone: buyer.phone,
+                        email: buyer.email
+                    },
+                    service: "locker-to-locker"
+                })
+            });
+
+            let data = await res.json();
+            console.log("Shipment created:", data);
+            document.getElementById("confirmation").innerText =
+                `✅ Order confirmed! Your parcel will go to PUDO Locker: ${lockerId}. 
+    Tracking #: ${data.tracking_number}`;
+        }
+    </script>
+
+</body>
+
+</html>
